@@ -1,0 +1,55 @@
+databaseChangeLog:
+  - changeSet:
+      id: create_card_status_enum
+      author: Daniil_Smirnov
+      changes:
+        - sqlFile:
+            path: ${CHANGELOG_BASE}/v1.0/sql/enums/create/ddl-create-card-status-enum.sql
+      rollback:
+        - sqlFile:
+            path: ${CHANGELOG_BASE}/v1.0/sql/enums/drop/ddl-drop-card-status-enum.sql
+  - changeSet:
+      id: create_card_table
+      author: Daniil_Smirnov
+      changes:
+        - createTable:
+            tableName: card
+            remarks: "Таблица карт"
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  remarks: "Идентификатор пользователя"
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: card_number
+                  type: VARCHAR(19)
+                  remarks: "Номер карты"
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: owner_name
+                  type: VARCHAR(100)
+                  remarks: "Имя владельца карты"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: expiry_date
+                  type: DATE
+                  remarks: "Дата окончания срока действия карты"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: status
+                  type: CARD_STATUS
+                  remarks: "Статус карты"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: balance
+                  type: DECIMAL(15,2)
+                  remarks: "Баланс на карте"
+                  constraints:
+                    nullable: false

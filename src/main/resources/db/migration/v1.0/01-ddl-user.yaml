@@ -1,0 +1,123 @@
+databaseChangeLog:
+  - changeSet:
+      id: create_role_name_enum
+      author: Daniil_Smirnov
+      changes:
+        - sqlFile:
+            path: ${CHANGELOG_BASE}/v1.0/sql/enums/create/ddl-create-user-role-name-enum.sql
+      rollback:
+        - sqlFile:
+            path: ${CHANGELOG_BASE}/v1.0/sql/enums/drop/ddl-drop-user-role-name-enum.sql
+  - changeSet:
+      id: create-table-role
+      author: Daniil_Smirnov
+      changes:
+        - createTable:
+            tableName: role
+            remarks: "Таблица с данными ролей"
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  remarks: "Идентификатор роли"
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(100)
+                  remarks: "Название роли"
+                  constraints:
+                    nullable: false
+                    unique: true
+  - changeSet:
+      id: create-table-user
+      author: Daniil_Smirnov
+      changes:
+        - createTable:
+            tableName: users
+            remarks: "Таблица пользователей"
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  remarks: "Идентификатор пользователя"
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: username
+                  type: VARCHAR(100)
+                  remarks: "Логин пользователя"
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: password
+                  type: VARCHAR(100)
+                  remarks: "Пароль пользователя"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: first_name
+                  type: VARCHAR(100)
+                  remarks: "Имя пользователя"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: last_name
+                  type: VARCHAR(100)
+                  remarks: "Фамилия пользователя"
+                  constraints:
+                    nullable: false
+
+  - changeSet:
+      id: create-table-user-roles
+      author: Daniil_Smirnov
+      changes:
+        - createTable:
+            tableName: user_roles
+            remarks: "Таблица для связи многие ко многим между пользователями и ролями"
+            columns:
+              - column:
+                  name: user_id
+                  type: UUID
+                  remarks: "Идентификатор пользователя"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: role_id
+                  type: BIGINT
+                  remarks: "Идентификатор роли"
+                  constraints:
+                    nullable: false
+        - addPrimaryKey:
+            tableName: user_roles
+            columnNames: user_id, role_id
+            constraintName: pk_user_roles
+        - addForeignKeyConstraint:
+            baseTableName: user_roles
+            baseColumnNames: user_id
+            referencedTableName: users
+            referencedColumnNames: id
+            onDelete: CASCADE
+            constraintName: fk_user_roles_user
+        - addForeignKeyConstraint:
+            baseTableName: user_roles
+            baseColumnNames: role_id
+            referencedTableName: role
+            referencedColumnNames: id
+            onDelete: CASCADE
+            constraintName: fk_user_roles_role
+  - changeSet:
+      id: insert_roles
+      author: Daniil_Smirnov
+      changes:
+        - sqlFile:
+            path: ${CHANGELOG_BASE}/v1.0/sql/insert/dml-insert-roles.sql
+  - changeSet:
+      id: insert_admin_user
+      author: Daniil_Smirnov
+      changes:
+        - sqlFile:
+            path: ${CHANGELOG_BASE}/v1.0/sql/insert/dml-insert-admin-user.sql

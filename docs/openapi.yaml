@@ -1,0 +1,657 @@
+openapi: 3.0.3
+info:
+  title: Bank Cards API
+  version: 1.0.0
+  description: API для управления пользователями, картами и аутентификации
+servers:
+  - url: http://localhost:8080
+tags:
+  - name: Card
+    description: Операции с банковскими картами
+  - name: User
+    description: Операции с пользователями
+  - name: Auth
+    description: Операции аутентификации и регистрации
+
+paths:
+  /auth/login:
+    post:
+      tags:
+        - Auth
+      summary: Авторизация пользователя
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthRequestDto'
+      responses:
+        '200':
+          description: Успешная авторизация
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponseDto'
+        '400':
+          description: Неверный логин или пароль
+        '500':
+          description: Внутренняя ошибка сервера
+
+  /auth/register:
+    post:
+      tags:
+        - Auth
+      summary: Регистрация пользователя
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequestDto'
+      responses:
+        '201':
+          description: Пользователь успешно зарегистрирован
+        '400':
+          description: Логин уже занят или данные невалидны
+        '500':
+          description: Внутренняя ошибка сервера
+
+  /api/admin/users:
+    post:
+      tags:
+        - User
+      summary: Создание пользователя
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreateRequestDto'
+      responses:
+        '201':
+          description: Пользователь успешно создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserInfoResponseDto'
+        '400':
+          description: Ошибка валидации
+        '403':
+          description: Доступ запрещен
+        '500':
+          description: Внутренняя ошибка сервера
+    get:
+      tags:
+        - User
+      summary: Получение списка пользователей
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+          description: Номер страницы
+        - in: query
+          name: size
+          schema:
+            type: integer
+          description: Размер страницы
+      responses:
+        '200':
+          description: Список пользователей получен
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserInfoResponseDto'
+        '403':
+          description: Доступ запрещен
+        '500':
+          description: Внутренняя ошибка сервера
+
+  /api/admin/users/{userId}:
+    get:
+      tags:
+        - User
+      summary: Получение пользователя по ID
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Пользователь найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserInfoResponseDto'
+        '404':
+          description: Пользователь не найден
+        '403':
+          description: Доступ запрещен
+        '500':
+          description: Внутренняя ошибка сервера
+    patch:
+      tags:
+        - User
+      summary: Обновление пользователя
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdateRequestDto'
+      responses:
+        '200':
+          description: Пользователь успешно обновлён
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserInfoResponseDto'
+        '400':
+          description: Ошибка валидации
+        '404':
+          description: Пользователь не найден
+        '403':
+          description: Доступ запрещен
+        '500':
+          description: Внутренняя ошибка сервера
+    delete:
+      tags:
+        - User
+      summary: Удаление пользователя
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Пользователь успешно удалён
+        '404':
+          description: Пользователь не найден
+        '403':
+          description: Доступ запрещен
+        '500':
+          description: Внутренняя ошибка сервера
+
+  /api/admin/cards:
+    post:
+      tags:
+        - Card
+      summary: Создание карты
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CardCreateRequestDto'
+      responses:
+        '201':
+          description: Карта создана
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CardInfoResponseDto'
+        '400':
+          description: Ошибка валидации
+        '403':
+          description: Доступ запрещен
+        '500':
+          description: Внутренняя ошибка сервера
+    get:
+      tags:
+        - Card
+      summary: Получение всех карт
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+        - in: query
+          name: size
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Список карт получен
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CardInfoResponseDto'
+        '403':
+          description: Доступ запрещен
+        '500':
+          description: Внутренняя ошибка сервера
+
+  /api/admin/cards/{cardId}/status:
+    patch:
+      tags:
+        - Card
+      summary: Изменение статуса карты
+      parameters:
+        - in: path
+          name: cardId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: status
+          schema:
+            $ref: '#/components/schemas/CardStatus'
+      responses:
+        '200':
+          description: Статус карты
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Сообщение об успешном удалении
+                example: "Карта с ID 789e4567-e89b-12d3-a456-426614174015 успешно удалена."
+        '404':
+          description: Карта не найдена
+        '403':
+          description: Доступ запрещен
+        '500':
+          description: Внутренняя ошибка сервера
+
+  /api/admin/cards/{cardId}:
+    delete:
+      tags:
+        - Card
+      summary: Удаление карты
+      parameters:
+        - in: path
+          name: cardId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Карта успешно удалена
+        '404':
+          description: Карта не найдена
+        '403':
+          description: Доступ запрещен
+        '500':
+          description: Внутренняя ошибка сервера
+
+  /api/user/cards:
+    get:
+      tags:
+        - Card
+      summary: Получение своих карт
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+        - in: query
+          name: size
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Список карт пользователя
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CardInfoResponseDto'
+        '404':
+          description: Карты пользователя не найдены
+        '403':
+          description: Доступ запрещен
+        '500':
+          description: Внутренняя ошибка сервера
+    post:
+      tags:
+        - Card
+      summary: Перевод между своими картами
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CardTransferRequestDto'
+      responses:
+        '200':
+          description: Перевод выполнен успешно
+        '400':
+          description: Ошибка перевода
+        '404':
+          description: Одна из карт не найдена
+        '403':
+          description: Доступ запрещен
+        '500':
+          description: Внутренняя ошибка сервера
+
+  /api/user/cards/{cardId}/balance:
+    get:
+      tags:
+        - Card
+      summary: Просмотр баланса карты
+      parameters:
+        - in: path
+          name: cardId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Баланс карты
+          example: 1000.00 успешно получен
+          content:
+            application/json:
+              schema:
+                type: number
+                format: double
+        '400':
+          description: Карта не принадлежит пользователю
+        '404':
+          description: Карта не найдена
+        '403':
+          description: Доступ запрещен
+        '500':
+          description: Внутренняя ошибка сервера
+
+components:
+  schemas:
+    Role:
+      type: object
+      description: Сущность содержащая информацию о роли пользователя
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Идентификатор роли
+          example: 15
+        name:
+          $ref: '#/components/schemas/RoleName'
+          description: Название роли
+          example: ADMIN
+    Card:
+      type: object
+      description: Сущность содержащая информацию о карте пользователя
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Идентификатор
+          example: 789e4567-e89b-12d3-a456-42661417401574015
+        number:
+          type: string
+          description: Номер карты
+          example: "1234123412341234"
+        ownerId:
+          type: string
+          format: uuid
+          description: Идентификатор владельца карты
+          example: 789e4567-e89b-12d3-a456-426614174015
+        expiryDate:
+          type: string
+          format: date
+          description: Дата окончания срока действия карты
+          example: "2030-12-31"
+        status:
+          $ref: '#/components/schemas/CardStatus'
+          description: Статус карты
+          example: ACTIVE
+        balance:
+          type: number
+          format: double
+          description: Баланс карты
+          example: 1000.00
+    User:
+      type: object
+      description: Сущность пользователя
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Идентификатор пользователя
+          example: 789e4567-e89b-12d3-a456-426614174015
+        username:
+          type: string
+          description: Логин пользователя
+          example: "Dodo"
+        firstName:
+          type: string
+          description: Имя пользователя
+          example: "Иван"
+        lastName:
+          type: string
+          description: Фамилия пользователя
+          example: "Иванов"
+        password:
+          type: string
+          description: Пароль
+          example: "$2a$12$Be/kS1Sbj2ku451KsmCH4eEWv2MwC2nA3AqPNGL2Qy5hj73sxcQgq"
+        roles:
+          type: array
+          description: Права пользователя
+          items:
+            $ref: '#/components/schemas/Role'
+    CardStatus:
+      type: string
+      enum:
+        - ACTIVE
+        - BLOCKED
+        - EXPIRED
+    RoleName:
+      type: string
+      enum:
+        - USER
+        - ADMIN
+    CardCreateRequestDto:
+      type: object
+      properties:
+        ownerId:
+          type: string
+          format: uuid
+          description: Идентификатор владельца карты
+          example: 789e4567-e89b-12d3-a456-426614174015
+        number:
+          type: string
+          description: Номер карты
+          example: "1234123412341234"
+        expiryDate:
+          type: string
+          format: date
+          description: Дата окончания срока действия карты
+          example: "2030-12-31"
+        balance:
+          type: number
+          format: double
+          description: Баланс карты
+          example: 1000.00
+    CardTransferRequestDto:
+      type: object
+      properties:
+        fromCardId:
+          type: string
+          format: uuid
+          description: Идентификатор карты-отправителя
+          example: 789e4567-e89b-12d3-a456-426614174015
+        toCardId:
+          type: string
+          format: uuid
+          description: Идентификатор карты-получателя
+          example: 789e4567-e89b-12d3-a456-426614174016
+        amount:
+          type: number
+          format: double
+          description: Сумма перевода
+          example: 50.00
+        userId:
+          type: string
+          format: uuid
+          description: Идентификатор пользователя, совершающего перевод
+          example: 789e4567-e89b-12d3-a456-426614174017
+    CardInfoResponseDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Идентификатор
+        ownerId:
+          type: string
+          format: uuid
+          description: Идентификатор владельца карты
+        number:
+          type: string
+          description: Номер карты
+          example: "1234123412341234"
+        status:
+          $ref: '#/components/schemas/CardStatus'
+          description: Статус карты
+          example: ACTIVE
+        expiryDate:
+          type: string
+          format: date
+          description: Дата окончания срока действия карты
+          example: "2030-12-31"
+        balance:
+          type: number
+          format: double
+          description: Баланс карты
+          example: 1000.00
+    UserCreateRequestDto:
+      type: object
+      properties:
+        username:
+          type: string
+          description: Логин пользователя
+          example: "Dodo"
+        firstName:
+          type: string
+          description: Имя пользователя
+          example: "Иван"
+        lastName:
+          type: string
+          description: Фамилия пользователя
+          example: "Иванов"
+        password:
+          type: string
+          description: Пароль
+          example: "PASSword123!"
+        roles:
+          type: array
+          description: Роли пользователя
+          example: [ADMIN, USER]
+          items:
+            $ref: '#/components/schemas/RoleName'
+    UserUpdateRequestDto:
+      type: object
+      description: DTO для обновления данных пользователя. Используется администратором для частичного обновления информации о пользователе. Поля являются опциональными.
+      properties:
+        username:
+          type: string
+          description: Логин пользователя
+          minLength: 3
+          maxLength: 100
+          example: "Dodo"
+        password:
+          type: string
+          description: Пароль пользователя. Должен содержать хотя бы одну заглавную букву, одну строчную и одну цифру
+          minLength: 8
+          maxLength: 30
+          pattern: "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d).+$"
+          example: "Password1"
+        firstName:
+          type: string
+          description: Имя пользователя
+          maxLength: 100
+          example: "Иван"
+        lastName:
+          type: string
+          description: Фамилия пользователя
+          maxLength: 100
+          example: "Иванов"
+          roles:
+            type: array
+            description: Роли пользователя
+            items:
+              type: string
+            example: [ "USER", "ADMIN" ]
+    UserInfoResponseDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Идентификатор
+        username:
+          type: string
+          description: Логин пользователя
+          example: "Dodo"
+        firstName:
+          type: string
+          description: Имя пользователя
+          example: "Иван"
+        lastName:
+          type: string
+          description: Фамилия пользователя
+          example: "Иванов"
+        roles:
+          type: array
+          description: Роли пользователя
+          example: [ADMIN, USER]
+          items:
+            $ref: '#/components/schemas/RoleName'
+    AuthRequestDto:
+      type: object
+      properties:
+        username:
+          type: string
+          description: Логин пользователя
+          example: "Dodo"
+        password:
+          type: string
+          description: Пароль
+          example: "PASSword123!"
+    AuthResponseDto:
+      type: object
+      properties:
+        token:
+          type: string
+          description: JWT токен для авторизации
+          example: "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwMDEiLCJyb2xlcyI6WyJBRE1JTiIsIlVTRVIiXSwiaWF0IjoxNzY2NDQ1MTU3LCJleHAiOjE3NjY0NDYwNTd9.eoUGEF6jj5EaJ7_8pFYtPmBVIbcCKLsX_scfoALWDxY"
+    RegisterRequestDto:
+      type: object
+      properties:
+        username:
+          type: string
+          description: Логин пользователя
+          example: "Dodo"
+        password:
+          type: string
+          description: Пароль
+          example: "PASSword123!"
+        firstName:
+          type: string
+          description: Имя пользователя
+          example: "Иван"
+        lastName:
+          type: string
+          description: Фамилия пользователя
+          example: "Иванов"

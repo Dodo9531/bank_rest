@@ -1,0 +1,40 @@
+spring:
+  web:
+    resources:
+      static-locations: classpath:/META-INF/resources/,classpath:/resources/,classpath:/static/,classpath:/public/,file:/docs/
+  jpa:
+    open-in-view: false
+  application:
+    name: ${APPLICATION_NAME:bank-rest}
+  datasource:
+    username: ${DATABASE_USER:postgres}
+    password: ${DATABASE_PASSWORD:postgres}
+    url: jdbc:postgresql://${DATABASE_URL:localhost:5432}/bank_rest_db
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      schema: ${SCHEMA_NAME:public}
+      connection-timeout: 5000
+  liquibase:
+    change-log: classpath:db/migration/db.changelog-master.yaml
+    default-schema: ${SCHEMA_NAME:public}
+    parameters:
+      CHANGELOG_BASE: classpath:db/migration/
+
+jwt:
+  secret: ${JWT_TOKEN_SECRET:eeM9060sDCR7bINitx2gJTKkte0RybgH}
+  expiration: ${JWT_TOKEN_EXPIRATION:900000}
+
+data:
+  encryption:
+    secret: ${TEXT_ENCRYPTION_SECRET:eeM9060sDCR7bINitx2gJTKkte0Rybg1}
+    salt: ${TEXT_ENCRYPTION_SALT:5a1b2c3d4e6f}
+
+springdoc:
+  swagger-ui:
+    url: openapi.yaml
+
+server:
+  port: ${SERVER_PORT:8080}
+logging:
+  level:
+    org.springframework: INFO
