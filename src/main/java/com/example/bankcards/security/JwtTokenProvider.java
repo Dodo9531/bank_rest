@@ -12,7 +12,6 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
@@ -57,12 +56,12 @@ public class JwtTokenProvider {
 
 
     /**
-     * Извлечение username из токена
+     * Извлечение userId из токена
      *
      * @param token токен
-     * @return логин пользователя
+     * @return идентфикатор пользователя
      */
-    public String getUsername(String token) {
+    public String getUserIdFromToken(String token) {
         return parse(token).getSubject();
     }
 
